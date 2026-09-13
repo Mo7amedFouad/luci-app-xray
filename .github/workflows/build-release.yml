@@ -13,6 +13,8 @@ env:
 jobs:
   release:
     name: Build for ${{ matrix.arch }} (${{ matrix.id }})
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -100,14 +102,18 @@ jobs:
         run: |
           cd "$SDK_HOME"
           ./scripts/feeds update -a
-          ln -s "${{ github.workspace }}" "package/$PACKAGE_NAME"
+          ln -s "${{ github.workspace }}/core" "package/luci-app-xray"
+          ln -s "${{ github.workspace }}/status" "package/luci-app-xray-status"
+          ln -s "${{ github.workspace }}/geodata" "package/luci-app-xray-geodata"
           ./scripts/feeds install -a
           cd -
       - name: Build Packages
         run: |
           cd "$SDK_HOME"
           make defconfig
-          make package/${PACKAGE_NAME}/status/{clean,compile} V=s
+          make package/luci-app-xray/clean package/luci-app-xray/compile V=s
+          make package/luci-app-xray-status/clean package/luci-app-xray-status/compile V=s
+          make package/luci-app-xray-geodata/clean package/luci-app-xray-geodata/compile V=s
           find "$SDK_HOME/bin/" -type f \( -name "*.ipk" -o -name "*.apk" \) -exec ls -lh {} \;
           cd -
       - name: Copy Bin Files
