@@ -109,6 +109,7 @@ jobs:
           ln -s "${{ github.workspace }}/core" "package/luci-app-xray"
           ln -s "${{ github.workspace }}/status" "package/luci-app-xray-status"
           ln -s "${{ github.workspace }}/geodata" "package/luci-app-xray-geodata"
+          ln -s "${{ github.workspace }}/utils-automount" "package/automount"
           ./scripts/feeds install -a
           cd -
       - name: Build Packages
@@ -118,11 +119,12 @@ jobs:
           make package/luci-app-xray/clean package/luci-app-xray/compile V=s
           make package/luci-app-xray-status/clean package/luci-app-xray-status/compile V=s
           make package/luci-app-xray-geodata/clean package/luci-app-xray-geodata/compile V=s
+          make package/automount/clean package/automount/compile V=s
           find "$SDK_HOME/bin/" -type f \( -name "*.ipk" -o -name "*.apk" \) -exec ls -lh {} \;
           cd -
       - name: Copy Bin Files
         run: |
-          find "$SDK_HOME/bin/" -type f \( -name "${PACKAGE_NAME}*.ipk" -o -name "${PACKAGE_NAME}*.apk" \) | while read -r f; do
+          find "$SDK_HOME/bin/" -type f \( -name "${PACKAGE_NAME}*.ipk" -o -name "${PACKAGE_NAME}*.apk" -o -name "automount*.ipk" -o -name "automount*.apk" \) | while read -r f; do
             base="$(basename "$f")"
             cp "$f" "${{ github.workspace }}/${base%.*}-${{ matrix.arch }}.${base##*.}"
           done
